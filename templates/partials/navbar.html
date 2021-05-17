@@ -1,0 +1,38 @@
+{% include 'partials/login.html' %}
+{% include 'partials/default.html' %}
+{% include 'partials/register.html' %}
+<header class="main-navbar">
+    <div class="nav-int-btns">
+        <!-- <img class="logo" src="{{ url_for('static', filename= 'img/asser_logo.png') }}"> -->
+        <div class="wrap">
+            <div class="search">
+                    <form id="searchForm" action="/search" method="post" style="display: none">
+                    <input type="hidden" id="searchTerm" name="query" value="">  
+                    </form>
+
+                    <input type="text" class="searchTerm" placeholder="Search" name="query">
+                    <button type="submit" class="searchButton">
+                        <i class="fa fa-search"></i>
+                    </button>
+            </div>
+        </div>
+        {% if not user %}
+            <a class="btn-signup">Sign Up</a>
+            <a class="btn-login">Login</a>
+        {% endif %}
+        {% if user %}
+            <form id="logout" action="/logout" method="post" style="display: none"></form>
+            <a class="btn-logout" onclick="document.getElementById('logout').submit()">Logout</a>
+        {% endif %}
+        <a class="btn-create-post-hide">Create Post</a>
+    </div>
+</header>
+
+<script>
+    $(document).ready(function(){
+        $('.searchButton').click(function(){
+            $('#searchTerm').attr('value', $('.searchTerm').val());
+            $( "#searchForm" ).submit();
+        })
+    })
+</script>

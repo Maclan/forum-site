@@ -1,0 +1,80 @@
+{% for claim in claims %}
+<div class="claim-card" value="{{ claim.id }}">
+    {% if claim.relates_to %}
+        <a class="related-to-link" href="/claim/{{ claim.relates_to }}">Click here to see related Claim</a>
+    {% endif %}
+    <div class="card-user"><span>{{ claim.author }}</span><span class="card-date"> - <i class="claim-date">{{ claim.date }}</i>&nbsp;ago</span></div>
+    
+    <div class="card-heading">
+        <p>{{ claim.title }}</p>
+    </div>
+    <div class="card-desc">
+        <p>{{ claim.description }}</p>
+    </div>
+    <div class="card-img"></div>
+    <div class="card-controls">
+        {% set ns = namespace() %}
+        {% set ns.noneYetCheck = False %}  <!-- if no interactios in this topic yet -->
+        {% if not interactions %}
+            {% set ns.noneYetCheck = True %}
+            <a class="card-controls-btns card-votes card-vote-upvote" value="{{ claim.id }}" onclick="buttonClicked()">
+                <img class="card-upvote-arrow"></img>
+                <span class="card-upvote-count card-counts">{{ claim.total_likes }}</span>
+            </a>
+            <a class="card-controls-btns card-votes card-vote-downvote" value="{{ claim.id }}" onclick="buttonClicked()">
+                <img class="card-downvote-arrow"></img>
+                <span class="card-downvote-count card-counts">{{ claim.total_dislikes }}</span>
+            </a>
+        {% else %}
+            {% set ns.interactionCheck = False %}
+                {% for interaction in interactions %}
+                    {% if claim.id == interaction.claim_id %}
+                        {% set ns.interactionCheck = True %}
+                        {% if interaction.claim_like %}
+                            <a class="card-controls-btns card-votes card-vote-upvote t" value="{{ claim.id }}" onclick="buttonClicked()">
+                                <img class="card-upvote-arrow active"></img>
+                                <span class="card-upvote-count card-counts">{{ claim.total_likes }}</span>
+                            </a>
+                        {% else %}
+                            <a class="card-controls-btns card-votes card-vote-upvote" value="{{ claim.id }}" onclick="buttonClicked()">
+                                <img class="card-upvote-arrow"></img>
+                                <span class="card-upvote-count card-counts">{{ claim.total_likes }}</span>
+                            </a>
+                        {% endif %}
+                        {% if interaction.claim_dislike %}
+                            <a class="card-controls-btns card-votes card-vote-downvote" value="{{ claim.id }}" onclick="buttonClicked()">
+                                <img class="card-downvote-arrow active"></img>
+                                <span class="card-downvote-count card-counts">{{ claim.total_dislikes }}</span>
+                            </a>
+                        {% else %}
+                            <a class="card-controls-btns card-votes card-vote-downvote" value="{{ claim.id }}" onclick="buttonClicked()">
+                                <img class="card-downvote-arrow"></img>
+                                <span class="card-downvote-count card-counts">{{ claim.total_dislikes }}</span>
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+            {%if not ns.interactionCheck and not ns.noneYetCheck%}
+                <a class="card-controls-btns card-votes card-vote-upvote" value="{{ claim.id }}" onclick="buttonClicked()">
+                    <img class="card-upvote-arrow"></img>
+                    <span class="card-upvote-count card-counts">{{ claim.total_likes }}</span>
+                </a>
+                <a class="card-controls-btns card-votes card-vote-downvote" value="{{ claim.id }}" onclick="buttonClicked()">
+                    <img class="card-downvote-arrow"></img>
+                    <span class="card-downvote-count card-counts">{{ claim.total_dislikes }}</span>
+                </a>
+            {% endif %}
+        <a class="card-controls-btns">  
+            <i class="fas fa-comment"></i>
+            <span class="card-comment-count card-counts">{{ claim.total_comments }}</span>Comments
+        </a>
+        <a class="card-controls-btns post_related_claim"">Post Related Claim</a>
+        {% if admin %}
+            <a class="card-controls-btns delete_claim">Delete</a>
+         </div>
+        {% endif %}
+</div>
+</div>
+{% endfor %}

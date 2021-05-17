@@ -1,0 +1,28 @@
+<div class="create-claim-modal">
+    <div class="create-claiml-header">
+        <button type="button" class="create-claim-close">
+            <span>&#10005;</span>
+        </button>
+        <div class="create-claim-modal-title">
+            <h4>Create a Claim</h4>
+        </div>
+    </div>
+    <div class="create-claim-modal-body">
+        <form action="/create-claim" method="post">
+            {% for i in topic -%}
+            <input type="hidden" name="topic-id" value="{{ i.id }}" />
+            {% endfor %}
+            <input type="hidden" id="related_claim" name="related_claim_id" value="" />
+
+            <div class="create-claim-input">
+                <input type="text" class="form-control" id="claim-title" name="title" placeholder="Title" >
+            </div>
+            <div class="create-claim-input">
+                <textarea type="text" class="form-control create-claim-textarea" id="claim-description" name="description" placeholder="Description"></textarea>
+            </div>
+            <div class="create-claim-input">
+                <input type="submit" class="create-claim-btn" value="Post">
+            </div>
+        </form>
+    </div>
+</div>

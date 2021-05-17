@@ -1,0 +1,70 @@
+{% include 'partials/navbar.html' %}
+{% include 'partials/default.html' %}
+{% include 'partials/createTopic.html' %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename= 'css/index.css') }}">
+
+
+<body>
+    {% include 'partials/flashMessage.html' %}
+    <div class="topics">
+        <h1>Topics</h1>
+        <div>
+            <a class="btn-create-topic">Create Topic</a>
+        </div>
+
+        <!-- <div class="card">
+            <div class="card-heading-sorting">
+                <div class="sorting-btns">
+                    <a class="sorting-btn btn-popular sorting-active"><i></i>Popular</a>
+                    <a class="sorting-btn btn-new"><i></i>Trending</a>
+                    <a class="sorting-btn btn-rising"><i></i>Latest</a>
+                </div>
+            </div>
+        </div> -->
+
+        <div class="topics-table">
+            <table>
+                <tr>
+                    <th>Topic</th>
+                    <th>Author</th>
+                    <th>Total Claims</th>
+                </tr>
+                {% for topic in topics -%}
+                <tr class="topic-select" id="{{ topic.title }}">
+                    <td>{{ topic.title }}</td>
+                    <td>{{ topic.author }}</td>
+                    <td>{{ topic.claims }}</td>
+
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+    </div>
+</body>
+
+<script>
+    let user = JSON.parse('{{ user|tojson|safe }}');
+    let topics = JSON.parse('{{ topics|tojson|safe }}');
+
+    $(document).ready(function () {
+
+        $('.topic-select').click(function () {
+            window.location.href = "/topic/" + $(this).attr('id');
+        });
+
+        $('.btn-create-topic').click(function () {
+            $('.create-topic-modal').removeClass('fadeOut');
+            $('.create-topic-modal').addClass('fadeIn');
+            $('.create-topic-modal').show();
+        });
+
+        $('.create-topic-close').click(function () {
+            $('.create-topic-modal').removeClass('fadeIn');
+            $('.create-topic-modal').addClass('fadeOut');
+            $('.create-topic-modal').hide();
+        })
+
+    })
+</script>

@@ -1,0 +1,234 @@
+{% include 'partials/navbar.html' %}
+{% include 'partials/default.html' %}
+{% include 'partials/reply.html' %}
+
+<link rel="preload" as="image" href="{{ url_for('static', filename= 'svg/up_arrow.svg') }}">
+<link rel="preload" as="image" href="{{ url_for('static', filename= 'svg/down_arrow.svg') }}">
+<link rel="preload" as="image" href="{{ url_for('static', filename= 'svg/up_arrow_active.svg') }}">
+<link rel="preload" as="image" href="{{ url_for('static', filename= 'svg/down_arrow_active.svg') }}">
+
+<link rel="stylesheet" href="{{ url_for('static', filename= 'css/claim.css') }}">
+
+<a class="go-back" onclick="goBack()">Go Back</a>
+{% include 'partials/flashMessage.html' %}
+
+{% for claim in claim %}
+<div class="view-claim-card" value="{{ claim.id }}">
+    {% if claim.relates_to %}
+        <a class="related-to-link" href="/claim/{{ claim.relates_to }}">Click here to see related Claim</a>
+    {% endif %}
+    <div class="card-user"><span>{{ claim.author }}</span><span class="card-date"> - <i class="claim-date">{{ claim.date }}</i>&nbsp;ago</span></div>
+    
+    <div class="card-heading">
+        <p>{{ claim.title }}</p>
+    </div>
+    <div class="card-desc">
+        <p>{{ claim.description }}</p>
+    </div>
+    <div class="card-img"></div>
+    <div class="card-controls">
+        {% set ns = namespace() %}
+        {% set ns.noneYetCheck = False %}  <!-- if no interactios in this topic yet -->
+        {% if not interactions %}
+            {% set ns.noneYetCheck = True %}
+            <a class="card-controls-btns card-votes card-vote-upvote" value="{{ claim.id }}" onclick="buttonClicked()">
+                <img class="card-upvote-arrow"></img>
+                <span class="card-upvote-count card-counts">{{ claim.total_likes }}</span>
+            </a>
+            <a class="card-controls-btns card-votes card-vote-downvote" value="{{ claim.id }}" onclick="buttonClicked()">
+                <img class="card-downvote-arrow"></img>
+                <span class="card-downvote-count card-counts">{{ claim.total_dislikes }}</span>
+            </a>
+        {% else %}
+            {% set ns.interactionCheck = False %}
+                {% for interaction in interactions %}
+                    {% if claim.id == interaction.claim_id %}
+                        {% set ns.interactionCheck = True %}
+                        {% if interaction.claim_like %}
+                            <a class="card-controls-btns card-votes card-vote-upvote" value="{{ claim.id }}" onclick="buttonClicked()">
+                                <img class="card-upvote-arrow active"></img>
+                                <span class="card-upvote-count card-counts">{{ claim.total_likes }}</span>
+                            </a>
+                        {% else %}
+                            <a class="card-controls-btns card-votes card-vote-upvote" value="{{ claim.id }}" onclick="buttonClicked()">
+                                <img class="card-upvote-arrow"></img>
+                                <span class="card-upvote-count card-counts">{{ claim.total_likes }}</span>
+                            </a>
+                        {% endif %}
+                        {% if interaction.claim_dislike %}
+                            <a class="card-controls-btns card-votes card-vote-downvote" value="{{ claim.id }}" onclick="buttonClicked()">
+                                <img class="card-downvote-arrow active"></img>
+                                <span class="card-downvote-count card-counts">{{ claim.total_dislikes }}</span>
+                            </a>
+                        {% else %}
+                            <a class="card-controls-btns card-votes card-vote-downvote" value="{{ claim.id }}" onclick="buttonClicked()">
+                                <img class="card-downvote-arrow"></img>
+                                <span class="card-downvote-count card-counts">{{ claim.total_dislikes }}</span>
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+            {%if not ns.interactionCheck and not ns.noneYetCheck%}
+                <a class="card-controls-btns card-votes card-vote-upvote" value="{{ claim.id }}" onclick="buttonClicked()">
+                    <img class="card-upvote-arrow"></img>
+                    <span class="card-upvote-count card-counts">{{ claim.total_likes }}</span>
+                </a>
+                <a class="card-controls-btns card-votes card-vote-downvote" value="{{ claim.id }}" onclick="buttonClicked()">
+                    <img class="card-downvote-arrow"></img>
+                    <span class="card-downvote-count card-counts">{{ claim.total_dislikes }}</span>
+                </a>
+            {% endif %}
+
+        <a class="card-controls-btns font-weight-bold">
+            <i class="fas fa-comment"></i>
+            <span class="card-comment-count card-counts">{{ claim.total_comments }}</span>Comments
+        </a>
+    </div>
+    <form id="commentForm" method="post" onsubmit="changeActionUrl()">
+        <textarea class="card-comment-textarea" name="comment"></textarea>
+        <div class="radio-options">
+            <input type="radio" id="clarification" name="reply-type" value="clarification" required>
+            <label for="clarification">Clarification</label>
+            <input type="radio" id="supporting-argument" name="reply-type" value="supporting" required>
+            <label for="supporting-argument">Supporting Argument</label>
+            <input type="radio" id="counterargument" name="reply-type" value="counter" required>
+            <label for="counterargument">Counterargument</label>
+        </div>
+        <input type="submit" class="card-comment-input" value="Comment">
+
+    </form>
+    <hr class="comment-breaker">
+    <div class="comment-content">
+    </div>
+</div>
+</div>
+
+
+</div>
+</div>
+{% endfor %}
+
+
+<script>
+    let commentData = JSON.parse('{{ comments|tojson|safe }}')
+
+    function changeActionUrl() {
+        var action_src = window.location.href + '/comment';
+        var your_form = document.getElementById('commentForm');
+        your_form.action = action_src;
+    }
+
+    function changeActionUrlReply() {
+        var action_src = window.location.href + '/comment';
+        var your_form = document.getElementById('commentReplyForm');
+        your_form.action = action_src;
+    }
+
+
+    $(document).ready(function () {
+
+        loopComments(commentData);
+
+        // Run Every 15 Seconds
+        $(function () {
+            setInterval(getComments, 15000);
+        });
+
+        $('.btn-reply').click(function () {
+            let reply_id = $(this).closest('.comment').attr('id').replace('comment-', '');
+            $('#replyID').val(reply_id);
+            $('.reply-modal').show();
+        });
+
+        $('.reply-close').click(function () {
+            $('.reply-modal').hide();
+        })
+
+        $('.claim-date').each(function () {
+            let date = $(this).text()
+            date = timeAgo(date)
+            $(this).text(date)
+        })
+
+
+    })
+
+
+    function loopComments(json) {
+        for (var i = 0; i < json.length; i++) {
+            let element = json[i];
+            if (typeof element !== 'undefined' || element !== undefined) {
+                addComment(element);
+            }
+            for (var j = 0; j < element.length; j++) {
+                var version = element[j];
+            }
+        }
+    }
+
+    function addComment(data) {
+        if ('data' in data) {
+            parentData = data['data'];
+            if (!$('#comment-' + parentData.id).length) { // Element Exists
+                $('.comment-content').append("<div class='comment' id='comment-" + parentData.id +
+                    "'>{%include 'partials/comment.html'%}" + "</div>")
+                $('#comment-' + parentData.id).find('.comment-text').text(parentData.comment);
+                $('#comment-' + parentData.id).find('.comment-username').text(parentData.username);
+                $('#comment-' + parentData.id).find('.comment-date').text(parentData.date);
+
+                $('#comment-' + parentData.id).find('.reply-type-text').text(parentData.reply_type);
+                $('#comment-' + parentData.id).find('.reply-type-text').attr('id', parentData.reply_type);
+                $('#comment-' + parentData.id).find('#replyType').addClass(parentData.reply_type);
+            }
+            if ('reply' in data) {
+                replyData = data['reply']
+                appendChild(parentData.id, replyData)
+            }
+        } else {
+            if (!$('#comment-' + data.id).length) { // Element Exists
+                $('.comment-content').append("<div class='comment' id='comment-" + data.id +
+                    "'>{%include 'partials/comment.html'%}" + "</div>")
+                $('#comment-' + data.id).find('.comment-text').text(data.comment);
+                $('#comment-' + data.id).find('.comment-username').text(data.username);
+                $('#comment-' + data.id).find('.comment-date').text(data.date);
+                $('#comment-' + data.id).find('.reply-type-text').text(data.reply_type);
+                $('#comment-' + data.id).find('.reply-type-text').attr('id', data.reply_type);
+                $('#comment-' + data.id).find('#replyType').addClass(data.reply_type);
+            }
+        }
+    }
+
+    function appendChild(parentID, data) {
+        let childData;
+        for (let i = 0; i < data.length; i++) {
+            if ('reply' in data[i]) {
+                childData = data[i]['data'];
+            } else {
+                childData = data[i];
+            }
+            let claimDate = new Date(childData.date)
+            $("#comment-" + childData.reply_id).append("<div class='comment' id='comment-" + childData.id +
+                "'>{%include 'partials/comment.html'%}" + "</div>")
+            $('#comment-' + childData.id).find('.comment-text').text(childData.comment);
+            $('#comment-' + childData.id).find('.comment-username').text(childData.username);
+            $('#comment-' + childData.id).find('.comment-date').text(childData.date);
+            $('#comment-' + childData.id).find('.reply-type-text').text(childData.reply_type);
+            $('#comment-' + childData.id).find('.reply-type-text').attr('id', childData.reply_type);
+            $('#comment-' + childData.id).find('#replyType').addClass(childData.reply_type);
+        }
+
+    }
+
+    function getComments() {
+        $.ajax({
+            url: window.location.href + '/get-comments',
+            type: 'get',
+            success: function (data) {
+                loopComments(data)
+            }
+        })
+    }
+
+</script>

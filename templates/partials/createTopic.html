@@ -1,0 +1,23 @@
+<div class="create-topic-modal">
+    <div class="login-modal-header">
+        <button type="button" class="create-topic-close">
+            <span>&#10005;</span>
+        </button>
+        <div class="create-topic-modal-title">
+            <h4>Create Topic</h4>
+        </div>
+    </div>
+    <div class="create-topic-modal-body">
+        <form action="/create-topic" method="post">
+            <div class="create-topic-input">
+                <input type="text" class="form-control" id="topic-title" name="title" placeholder="Title" >
+            </div>
+            <div class="create-topic-input">
+                <textarea type="text" class="form-control create-topic-textarea" id="topic-description" name="description" placeholder="Description"></textarea>
+            </div>
+            <div class="create-topic-input">
+                <input type="submit" class="create-topic-btn" value="Create">
+            </div>
+        </form>
+    </div>
+</div>

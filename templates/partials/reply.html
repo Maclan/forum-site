@@ -1,0 +1,30 @@
+<div class="reply-modal">
+    <div class="reply-header">
+        <button type="button" class="reply-close">
+            <span>&#10005;</span>
+        </button>
+        <div class="reply-modal-title">
+            <h4>Reply to Comment</h4>
+        </div>
+    </div>
+    <div class="reply-modal-body">
+       
+        <form id="commentReplyForm" method="post" onsubmit="changeActionUrlReply()">
+            <div class="reply-input">
+                <textarea type="text" class="form-control reply-textarea" id="reply-text" name="comment" placeholder="Reply" required></textarea>
+            </div>
+            <input type="hidden" id="replyID" name="reply_id" value="">
+            <input type="radio" id="evidence" name="reply-type" value="evidence" required>
+            <label for="evidence">Evidence</label>
+            <input type="radio" id="support" name="reply-type" value="support" required>
+            <label for="support">Support</label>
+            <input type="radio" id="rebuttal" name="reply-type" value="rebuttal" required>
+            <label for="rebuttal">Rebuttal</label>
+            <div class="reply-input">
+                <input type="submit" class="reply-btn" value="Reply">
+            </div>
+        </form>
+    </div>
+
+    </div>
+</div>

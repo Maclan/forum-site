@@ -1,0 +1,52 @@
+{% include 'partials/navbar.html' %}
+{% include 'partials/default.html' %}
+
+<body>
+
+<a class="go-back" onclick="goBack()">Go Back</a>
+
+    <div class="content">
+
+        {% for claim in claims %}
+<div class="claim-card" value="{{ claim.id }}">
+    {% if claim.relates_to %}
+        <a class="related-to-link" href="/claim/{{ claim.relates_to }}">Click here to see related Claim</a>
+    {% endif %}
+    <div class="card-user"><span>{{ claim.author }}</span><span class="card-date"> - <i class="claim-date">{{ claim.date }}</i>&nbsp;ago</span></div>
+    
+    <div class="card-heading">
+        <p>{{ claim.title }}</p>
+    </div>
+    <div class="card-desc">
+        <p>{{ claim.description }}</p>
+    </div>
+    <div class="card-img"></div>
+    <div class="card-controls">
+        <a class="card-controls-btns">
+            <i class="fas fa-comment"></i>
+            <span class="card-comment-count card-counts">{{ claim.total_comments }}</span>Comments
+        </a>
+        </div>
+</div>
+</div>
+{% endfor %}
+    </div>
+</div>
+</div>
+    </div>
+</body>
+
+<script>
+    $(document).ready(function(){
+        $('.claim-date').each(function () {
+            let date = $(this).text()
+            date = timeAgo(date)
+            $(this).text(date)
+        })
+
+        $('.claim-card').click(function () {
+            let claim_id = $(this).attr('value');
+            window.location.href = "/claim/"+claim_id;
+        })
+    })
+</script>

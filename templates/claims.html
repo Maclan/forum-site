@@ -1,0 +1,169 @@
+{% include 'partials/navbar.html' %}
+{% include 'partials/default.html' %}
+{% include 'partials/createClaim.html' %}
+<link rel="preload" as="image" href="{{ url_for('static', filename= 'svg/up_arrow.svg') }}">
+<link rel="preload" as="image" href="{{ url_for('static', filename= 'svg/down_arrow.svg') }}">
+<link rel="preload" as="image" href="{{ url_for('static', filename= 'svg/up_arrow_active.svg') }}">
+<link rel="preload" as="image" href="{{ url_for('static', filename= 'svg/down_arrow_active.svg') }}">
+
+<link rel="stylesheet" href="{{ url_for('static', filename= 'css/claim.css') }}">
+
+<body>
+    <a class="go-back" href="/">Go Back</a>
+    {% include 'partials/flashMessage.html' %}
+    <div class="content">
+
+        <div>
+            <a class="btn-create-claim">Create Claim</a>
+        </div>
+        <div class="card">
+            <div class="card-heading-sorting">
+                <div class="sorting-btns">
+                    {% if sorting == 'popular' %}
+                    <a name="sorting" value="popular" class="sorting-btn btn-popular sorting-active"><i></i>Popular</a>
+                    {% else %}
+                    <a name="sorting" value="popular" class="sorting-btn btn-popular"><i></i>Popular</a>
+                    {% endif %}
+                    {% if sorting == 'latest' %}
+                    <a name="sorting" value="latest" class="sorting-btn btn-new sorting-active"><i></i>Latest</a>
+                    {% else %}
+                    <a name="sorting" value="latest" class="sorting-btn btn-new"><i></i>Latest</a>
+                    {% endif %}
+                    {% if sorting == 'rising' %}
+                    <a name="sorting" value="rising" class="sorting-btn btn-new sorting-active"><i></i>Rising</a>
+                    {% else %}
+                    <a name="sorting" value="rising" class="sorting-btn btn-new"><i></i>Rising</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% include 'partials/claimsCard.html' %}
+    </div>
+</body>
+
+<script>
+    let user = JSON.parse('{{ user|tojson|safe }}');
+    let topicID = '{{ topic[0]["id"] }}'
+    let check = '{{ admin }}'
+
+    let buttonClickedCheck = false;
+    $(document).ready(function () {
+        console.log(check);
+        $('.card-vote-upvote').click(function () {
+
+            let siblingDownvote = $(this).siblings().find('card-vote-downvote')['prevObject'];
+            if (siblingDownvote.find('img').hasClass('active')) {
+                let value = siblingDownvote.find('card-counts')['prevObject'].text();
+                siblingDownvote.find('img').removeClass('active');
+                siblingDownvote.find('.card-downvote-count').text(parseInt(value) - 1);
+            }
+
+            $(this).find('img').toggleClass('active');
+            if ($(this).find('img').hasClass('active')) {
+                let value = $(this).find('card-counts')['prevObject'].text();
+                $(this).find('.card-upvote-count').text(parseInt(value) + 1)
+            } else {
+                let value = $(this).find('card-counts')['prevObject'].text();
+                $(this).find('.card-upvote-count').text(parseInt(value) - 1)
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: '/interaction',
+                data: {
+                    id: $(this).attr('value'),
+                    like: 1,
+                    dislike: 0,
+                    topic_id: topicID
+                },
+            })
+        })
+
+        $('.card-vote-downvote').click(function () {
+            let siblingUpvote = $(this).siblings().find('card-vote-upvote')['prevObject'];
+            console.log(siblingUpvote);
+            if (siblingUpvote.find('img').hasClass('active')) {
+                let value = siblingUpvote.find('card-counts')['prevObject'].text();
+                siblingUpvote.find('img').removeClass('active');
+                siblingUpvote.find('.card-upvote-count').text(parseInt(value) - 1);
+            }
+            $(this).find('img').toggleClass('active');
+
+            if ($(this).find('img').hasClass('active')) {
+                let value = $(this).find('card-counts')['prevObject'].text();
+                $(this).find('.card-downvote-count').text(parseInt(value) + 1)
+            } else {
+                let value = $(this).find('card-counts')['prevObject'].text();
+                $(this).find('.card-downvote-count').text(parseInt(value) - 1)
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: '/interaction',
+                data: {
+                    id: $(this).attr('value'),
+                    like: 0,
+                    dislike: 1,
+                    topic_id: topicID
+                },
+            })
+        })
+        
+        $('.card-controls-btns').click(function(){
+            buttonClickedCheck = true;
+        });
+
+        $('.post_related_claim').click(function () {
+            buttonClickedCheck = true;
+            $('.create-claim-modal').show();
+            let relatedClaimID = $(this).closest('.claim-card').attr('value');
+            $('#related_claim').attr('value', relatedClaimID);
+        })
+
+        $('.btn-create-claim').click(function () {
+            $('.create-claim-modal').addClass('fadeIn');
+            $('.create-claim-modal').removeClass('fadeOut');
+            $('.create-claim-modal').show();
+        });
+
+        $('.create-claim-close').click(function () {
+            $('.create-claim-modal').addClass('fadeOut');
+            $('.create-claim-modal').removeClass('fadeIn');
+            $('.create-claim-modal').hide();
+        })
+
+        $('.claim-card').click(function () {
+            console.log(buttonClickedCheck);
+            if (!buttonClickedCheck) {
+                let claim_id = $(this).attr('value');
+                window.location.href = "/claim/" + claim_id;
+            }
+            buttonClickedCheck = false;
+        })
+
+        $('.sorting-btn').click(function () {
+
+            let sortingvalue = $(this).attr('value');
+            let topicTitle = window.location.href.split("/").pop();
+            topicTitle = topicTitle.replace(/%20/g, " ");
+            console.log(topicTitle);
+            $.ajax({
+                url: '/sorting',
+                type: 'POST',
+                data: {
+                    sortingType: sortingvalue,
+                    topicID: topicTitle
+                },
+                success: function (data) {
+                    location.reload()
+                }
+            })
+        })
+
+        $('.claim-date').each(function () {
+            let date = $(this).text()
+            date = timeAgo(date)
+            $(this).text(date)
+        })
+    });
+</script>

@@ -1,0 +1,38 @@
+{% if not user %}
+    <div class="register-modal">
+        <div class="register-modal-header">
+            <button type="button" class="register-close">
+                <span>&#10005;</span>
+            </button>
+            <div class="register-modal-title">
+                {% if error %}
+                    <p class="error"><strong>Error:</strong> {{ error }}
+                {% endif %}
+                <h4>Register</h4>
+            </div>
+        </div>
+        <div class="auth-modal-body">
+            <form action="/register" method="post">
+                <div class="register-input">
+                    <input type="text" class="form-control register-username" placeholder="Username" aria-label="Username" name="username" value="{{
+                        request.form.username }}">
+                </div>     
+                <div class="register-input">
+                    <input type="text" class="form-control register-password" placeholder="Email" aria-label="Email" name="email" value="{{
+                        request.form.email }}">
+                </div> 
+                <div class="register-input">
+                    <input type="password" class="form-control register-password" placeholder="Password" aria-label="Password" name="password" value="{{
+                        request.form.password }}">
+                </div>
+                <div class="register-input">
+                    <input type="password" class="form-control register-confirm-password" placeholder="Confirm Password" aria-label="Confirm Password" name="confirmPassword" value="{{
+                        request.form.confirmPassword }}">
+                </div>    
+                <div class="register-input">
+                    <input class="register-btn" type="submit" value="Register">
+                </div>
+            </form>
+        </div>
+    </div>
+{% endif %}
